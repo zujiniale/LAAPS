@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APS — Guia de Segurança Digital · Versão Mínima</title>
+<!-- Anti-flash: aplica tema antes do primeiro paint -->
+<script>
+(function(){
+  var t=localStorage.getItem('aps-theme');
+  var pref=window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark';
+  document.documentElement.setAttribute('data-theme',t||pref);
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;600&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+
+/* ═══════════════════════════════════════════════════════
+   1. THEME TOKENS — 5 TEMAS
+   ═══════════════════════════════════════════════════════ */
+
+:root, [data-theme="dark"] {
+  --bg:        #0d0f12;
+  --bg2:       #13161b;
+  --bg3:       #1a1e26;
+  --border:    #252932;
+  --text:      #c8cdd8;
+  --text-dim:  #7e8599;
+  --text-head: #e8ecf4;
+  --accent:    #4af0c4;
+  --accent2:   #f0894a;
+  --accent3:   #7a9cf0;
+  --accent4:   #f0d44a;
+  --danger:    #f05a5a;
+  --success:   #4af090;
+  --serif:     'Instrument Serif', Georgia, serif;
+  --mono:      'JetBrains Mono', monospace;
+  --sans:      'Sora', system-ui, sans-serif;
+  --radius:    8px;
+  --glow:      0 0 28px rgba(74,240,196,0.10);
+  --shadow:    0 2px 20px rgba(0,0,0,0.40);
+  --noise:     0.025;
+}
+
+[data-theme="nord"] {
+  --bg:#2e3440; --bg2:#3b4252; --bg3:#434c5e; --border:#4c566a;
+  --text:#d8dee9; --text-dim:#9aa5bb; --text-head:#eceff4;
+  --accent:#88c0d0; --accent2:#d08770; --accent3:#81a1c1; --accent4:#ebcb8b;
+  --danger:#bf616a; --success:#a3be8c;
+  --glow:0 0 28px rgba(136,192,208,0.12); --shadow:0 2px 20px rgba(0,0,0,0.25);
+  --noise:0.015;
+}
+
+[data-theme="tokyo"] {
+  --bg:#1a1b26; --bg2:#24283b; --bg3:#292e42; --border:#33395a;
+  --text:#a9b1d6; --text-dim:#8087a8; --text-head:#c0caf5;
+  --accent:#7aa2f7; --accent2:#ff9e64; --accent3:#9ece6a; --accent4:#e0af68;
+  --danger:#f7768e; --success:#9ece6a;
+  --glow:0 0 28px rgba(122,162,247,0.12); --shadow:0 2px 20px rgba(0,0,0,0.30);
+  --noise:0.018;
+}
+
+[data-theme="light"] {
+  --bg:#f7f9fc; --bg2:#ffffff; --bg3:#eef1f7; --border:#dde3ef;
+  --text:#3d4557; --text-dim:#5e6880; --text-head:#111828;
+  --accent:#0c5f4a; --accent2:#b84a0e; --accent3:#2347a0; --accent4:#7a5700;
+  --danger:#a61414; --success:#155230;
+  --glow:0 0 28px rgba(12,95,74,0.08); --shadow:0 2px 20px rgba(0,0,0,0.08);
+  --noise:0.008;
+}
+
+[data-theme="hc"] {
+  --bg:#000000; --bg2:#0a0a0a; --bg3:#141414; --border:#555555;
+  --text:#ffffff; --text-dim:#bbbbbb; --text-head:#ffffff;
+  --accent:#00ffe0; --accent2:#ff8800; --accent3:#6699ff; --accent4:#ffee00;
+  --danger:#ff4444; --success:#00ff66;
+  --glow:0 0 24px rgba(0,255,224,0.30); --shadow:0 2px 16px rgba(0,0,0,0.9);
+  --noise:0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   2. RESET & BASE
+   ═══════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-weight: 300;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.22s ease, color 0.22s ease;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  opacity: var(--noise);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  transition: opacity 0.22s;
+}
+
+.sr-only {
+  position: absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+}
+
+:focus-visible {
+  outline: 2.5px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   3. PROGRESS BAR
+   ═══════════════════════════════════════════════════════ */
+#progress-bar {
+  position: fixed; top:0; left:0;
+  height: 2.5px; width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--accent3));
+  z-index: 200;
+  transition: width 0.08s linear;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════
+   4. SKIP LINK
+   ═══════════════════════════════════════════════════════ */
+.skip-link {
+  position: fixed; top: -100%; left: 1rem; z-index: 9999;
+  background: var(--accent); color: var(--bg);
+  font-family: var(--mono); font-size: 0.78rem; font-weight: 600;
+  padding: 0.6rem 1.1rem;
+  border-radius: 0 0 var(--radius) var(--radius);
+  text-decoration: none; letter-spacing: 0.04em;
+  transition: top 0.12s ease;
+}
+.skip-link:focus { top: 0; }
+
+/* ═══════════════════════════════════════════════════════
+   5. MOBILE HEADER
+   ═══════════════════════════════════════════════════════ */
+.mobile-header {
+  display: none;
+  position: sticky; top: 0; z-index: 110;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 0.8rem 1.25rem;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.22s;
+}
+.mobile-title {
+  font-family: var(--mono); font-size: 0.68rem;
+  color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase;
+}
+.hamburger {
+  background: none; border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.45rem 0.55rem; cursor: pointer;
+  color: var(--text);
+  display: flex; flex-direction: column; gap: 4px; align-items: center;
+  transition: border-color 0.15s, color 0.15s;
+}
+.hamburger:hover { border-color: var(--accent); color: var(--accent); }
+.hamburger span {
+  display: block; width: 17px; height: 1.5px;
+  background: currentColor;
+  transition: transform 0.2s ease, opacity 0.2s;
+  transform-origin: center;
+}
+.hamburger.active span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
+.hamburger.active span:nth-child(2) { opacity: 0; }
+.hamburger.active span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
+
+#sidebar-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55); z-index: 90;
+  backdrop-filter: blur(2px);
+}
+#sidebar-overlay.visible { display: block; }
+
+/* ═══════════════════════════════════════════════════════
+   6. LAYOUT
+   ═══════════════════════════════════════════════════════ */
+.layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+  position: relative; z-index: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ═══════════════════════════════════════════════════════
+   7. SIDEBAR
+   ═══════════════════════════════════════════════════════ */
+.sidebar {
+  position: sticky; top: 0;
+  height: 100vh; overflow-y: auto;
+  padding: 2rem 1.25rem;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 1.75rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+  transition: transform 0.25s ease, background 0.22s;
+}
+
+.sidebar-brand {
+  display: flex; flex-direction: column; gap: 0.4rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-logo {
+  font-family: var(--mono); font-size: 0.72rem; font-weight: 600;
+  color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase;
+}
+.sidebar-tagline {
+  font-family: var(--sans); font-size: 0.72rem;
+  color: var(--text-dim); line-height: 1.4;
+}
+
+.nav-group { display: flex; flex-direction: column; gap: 0.25rem; }
+.nav-group-label {
+  font-family: var(--mono); font-size: 0.6rem; font-weight: 600;
+  color: var(--text-dim); letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 0 0.5rem 0.4rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0.25rem;
+}
+.nav-link {
+  display: block;
+  font-family: var(--sans); font-size: 0.78rem; font-weight: 400;
+  color: var(--text-dim); text-decoration: none;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  border-left: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.nav-link:hover { color: var(--text-head); background: var(--bg2); }
+.nav-link.active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  background: rgba(74,240,196,0.05);
+}
+
+.sidebar-controls {
+  margin-top: auto;
+  display: flex; flex-direction: column; gap: 0.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.ctrl-label {
+  font-family: var(--mono); font-size: 0.6rem; font-weight: 600;
+  color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase;
+}
+
+.theme-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.35rem;
+}
+.theme-btn {
+  height: 26px; border-radius: 5px;
+  border: 1.5px solid var(--border);
+  cursor: pointer; transition: border-color 0.15s, transform 0.1s;
+  font-size: 0.55rem; font-family: var(--mono);
+  display: flex; align-items: center; justify-content: center;
+  letter-spacing: 0.04em; font-weight: 600;
+}
+.theme-btn:hover { border-color: var(--accent); transform: scale(1.05); }
+.theme-btn.active { border-color: var(--accent); }
+.theme-btn[data-t="dark"]       { background:#0d0f12; color:#4af0c4; }
+.theme-btn[data-t="nord"]       { background:#3b4252; color:#88c0d0; }
+.theme-btn[data-t="tokyo"]      { background:#1a1b26; color:#7aa2f7; }
+.theme-btn[data-t="light"]      { background:#f7f9fc; color:#0c5f4a; }
+.theme-btn[data-t="hc"]         { background:#000;    color:#00ffe0; }
+
+/* ═══════════════════════════════════════════════════════
+   8. MAIN CONTENT
+   ═══════════════════════════════════════════════════════ */
+main {
+  padding: 3rem 3.5rem 5rem;
+  min-width: 0;
+}
+
+/* Section fade-in */
+.section { opacity: 0; transform: translateY(18px); transition: opacity 0.55s ease, transform 0.55s ease; }
+.section.visible { opacity: 1; transform: none; }
+
+/* Section numbers */
+section { scroll-margin-top: 1.5rem; }
+
+/* ═══════════════════════════════════════════════════════
+   9. HERO
+   ═══════════════════════════════════════════════════════ */
+.hero {
+  padding: 0 0 3.5rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 3.5rem;
+}
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  font-family: var(--mono); font-size: 0.68rem; font-weight: 600;
+  color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase;
+  background: rgba(74,240,196,0.07);
+  border: 1px solid rgba(74,240,196,0.2);
+  padding: 0.4rem 0.9rem; border-radius: 100px;
+  margin-bottom: 1.5rem;
+  animation: badgePulse 3s ease-in-out infinite;
+}
+@keyframes badgePulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(74,240,196,0); }
+  50% { box-shadow: 0 0 0 6px rgba(74,240,196,0.08); }
+}
+.hero-badge::before {
+  content: ''; display: block;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
+  animation: dot 2s ease-in-out infinite;
+}
+@keyframes dot { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+.hero h1 {
+  font-family: var(--serif);
+  font-size: clamp(2.2rem, 4.5vw, 3.4rem);
+  font-weight: 400;
+  color: var(--text-head);
+  line-height: 1.15;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.01em;
+}
+.hero h1 em {
+  font-style: italic;
+  color: var(--accent);
+  display: block;
+  font-size: 0.72em;
+  letter-spacing: 0;
+}
+
+.hero-desc {
+  font-size: 1.05rem; color: var(--text-dim);
+  max-width: 520px; margin-bottom: 1.75rem;
+  line-height: 1.7;
+}
+
+.hero-chips {
+  display: flex; flex-wrap: wrap; gap: 0.5rem;
+  margin-bottom: 1.75rem;
+}
+.chip {
+  font-family: var(--mono); font-size: 0.7rem; font-weight: 600;
+  padding: 0.3rem 0.75rem; border-radius: 100px;
+  letter-spacing: 0.04em;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  background: var(--bg2);
+}
+.chip.accent  { border-color: rgba(74,240,196,0.3); color: var(--accent); background: rgba(74,240,196,0.06); }
+.chip.accent2 { border-color: rgba(240,137,74,0.3); color: var(--accent2); background: rgba(240,137,74,0.06); }
+.chip.accent3 { border-color: rgba(122,156,240,0.3); color: var(--accent3); background: rgba(122,156,240,0.06); }
+
+.hero-cta {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-family: var(--mono); font-size: 0.8rem; font-weight: 600;
+  color: var(--bg); background: var(--accent);
+  padding: 0.65rem 1.3rem; border-radius: 6px;
+  text-decoration: none; letter-spacing: 0.04em;
+  transition: opacity 0.15s, transform 0.15s;
+  box-shadow: 0 0 20px rgba(74,240,196,0.25);
+}
+.hero-cta:hover { opacity: 0.88; transform: translateY(-1px); }
+
+/* ═══════════════════════════════════════════════════════
+   10. TYPOGRAPHY
+   ═══════════════════════════════════════════════════════ */
+.section-num {
+  font-family: var(--mono); font-size: 0.65rem; font-weight: 600;
+  color: var(--text-dim); letter-spacing: 0.1em;
+  display: block; margin-bottom: 0.4rem;
+}
+
+h2 {
+  font-family: var(--serif); font-size: 1.9rem; font-weight: 400;
+  color: var(--text-head); margin-bottom: 0.35rem;
+  line-height: 1.2; letter-spacing: -0.01em;
+}
+
+.section-lead {
+  color: var(--text-dim); font-size: 0.95rem;
+  max-width: 560px; margin-bottom: 2rem;
+  line-height: 1.65;
+}
+
+/* ═══════════════════════════════════════════════════════
+   11. TABLES
+   ═══════════════════════════════════════════════════════ */
+.req-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 0.88rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.req-table thead tr {
+  background: var(--bg3);
+}
+.req-table thead th {
+  font-family: var(--mono); font-size: 0.7rem; font-weight: 600;
+  color: var(--text-dim); letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 0.7rem 1rem; text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.req-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+}
+.req-table tbody tr:last-child { border-bottom: none; }
+.req-table tbody tr:hover { background: var(--bg2); }
+.req-table tbody td {
+  padding: 0.7rem 1rem; vertical-align: middle;
+}
+
+.req-table td:first-child {
+  font-family: var(--mono); font-size: 0.8rem; font-weight: 600;
+  color: var(--accent3); white-space: nowrap;
+}
+
+.status-ok {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-family: var(--mono); font-size: 0.72rem; font-weight: 600;
+  color: var(--success); background: rgba(74,240,144,0.08);
+  border: 1px solid rgba(74,240,144,0.2);
+  padding: 0.2rem 0.6rem; border-radius: 100px;
+}
+.status-ok::before { content:'✓'; }
+
+/* ═══════════════════════════════════════════════════════
+   12. MODULE CARDS
+   ═══════════════════════════════════════════════════════ */
+.modules-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.module-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  position: relative; overflow: hidden;
+  cursor: default;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.module-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.module-card.teal::before  { background: var(--accent); }
+.module-card.orange::before { background: var(--accent2); }
+
+.module-card:hover {
+  border-color: var(--accent3);
+  box-shadow: var(--glow);
+  transform: translateY(-2px);
+}
+
+.module-num {
+  font-family: var(--mono); font-size: 0.65rem; font-weight: 600;
+  color: var(--text-dim); letter-spacing: 0.1em;
+  margin-bottom: 0.6rem; display: block;
+}
+.module-title {
+  font-family: var(--sans); font-size: 1rem; font-weight: 600;
+  color: var(--text-head); margin-bottom: 0.75rem;
+}
+.module-desc {
+  font-size: 0.85rem; color: var(--text-dim); line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.module-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.tag {
+  font-family: var(--mono); font-size: 0.62rem; font-weight: 600;
+  letter-spacing: 0.05em; padding: 0.2rem 0.5rem;
+  border-radius: 4px; border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+.tag.teal   { color: var(--accent);  border-color: rgba(74,240,196,0.25); }
+.tag.orange { color: var(--accent2); border-color: rgba(240,137,74,0.25); }
+.tag.blue   { color: var(--accent3); border-color: rgba(122,156,240,0.25); }
+
+/* ═══════════════════════════════════════════════════════
+   13. CALLOUT
+   ═══════════════════════════════════════════════════════ */
+.callout {
+  border-left: 3px solid var(--accent);
+  background: var(--bg2);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  font-size: 0.9rem; line-height: 1.65;
+}
+.callout.orange { border-left-color: var(--accent2); }
+.callout.blue   { border-left-color: var(--accent3); }
+.callout.yellow { border-left-color: var(--accent4); }
+.callout.danger { border-left-color: var(--danger); }
+.callout.success{ border-left-color: var(--success); }
+
+.callout-label {
+  font-family: var(--mono); font-size: 0.65rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--accent); display: block; margin-bottom: 0.4rem;
+}
+.callout.orange .callout-label { color: var(--accent2); }
+.callout.blue   .callout-label { color: var(--accent3); }
+.callout.yellow .callout-label { color: var(--accent4); }
+.callout.success .callout-label { color: var(--success); }
+.callout.danger  .callout-label { color: var(--danger); }
+
+/* ═══════════════════════════════════════════════════════
+   14. STRUCT ITEMS
+   ═══════════════════════════════════════════════════════ */
+.struct-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.struct-item {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  transition: border-color 0.15s;
+}
+.struct-item:hover { border-color: var(--accent3); }
+
+.struct-name {
+  font-family: var(--mono); font-size: 0.9rem; font-weight: 600;
+  color: var(--accent3); margin-bottom: 0.35rem;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.struct-badge {
+  font-family: var(--mono); font-size: 0.6rem; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 0.15rem 0.45rem; border-radius: 4px;
+}
+.badge-obrig {
+  background: rgba(74,240,144,0.1);
+  border: 1px solid rgba(74,240,144,0.25);
+  color: var(--success);
+}
+
+.struct-location {
+  font-family: var(--mono); font-size: 0.72rem;
+  color: var(--text-dim); margin-bottom: 0.6rem;
+}
+.struct-desc { font-size: 0.85rem; color: var(--text); line-height: 1.6; }
+
+/* ═══════════════════════════════════════════════════════
+   15. CODE BLOCKS
+   ═══════════════════════════════════════════════════════ */
+.code-wrap {
+  position: relative; margin: 1.25rem 0;
+}
+.code-label {
+  display: inline-block;
+  font-family: var(--mono); font-size: 0.62rem; font-weight: 600;
+  color: var(--text-dim); letter-spacing: 0.08em; text-transform: uppercase;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+pre {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 0 var(--radius) var(--radius) var(--radius);
+  padding: 1.25rem 1.4rem;
+  overflow-x: auto;
+  font-family: var(--mono); font-size: 0.82rem;
+  line-height: 1.7;
+  color: var(--text);
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+code { font-family: var(--mono); font-size: 0.85em; }
+p code, li code, td code {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.1em 0.4em;
+  font-size: 0.82em;
+  color: var(--accent3);
+}
+
+.copy-btn {
+  position: absolute; top: 2rem; right: 0.75rem;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 0.3rem 0.55rem;
+  font-family: var(--mono); font-size: 0.62rem; font-weight: 600;
+  color: var(--text-dim); cursor: pointer; letter-spacing: 0.04em;
+  transition: color 0.15s, border-color 0.15s;
+  display: flex; align-items: center; gap: 0.3rem;
+}
+.copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+.copy-btn.copied { color: var(--success); border-color: var(--success); }
+
+/* Java syntax colors */
+.kw  { color: var(--accent3); }
+.str { color: var(--accent2); }
+.cm  { color: var(--text-dim); font-style: italic; }
+.fn  { color: var(--accent); }
+.num { color: var(--accent4); }
+.cls { color: var(--accent4); }
+
+/* ═══════════════════════════════════════════════════════
+   16. ARCH DIAGRAM
+   ═══════════════════════════════════════════════════════ */
+.arch-block {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem 1.75rem;
+  margin: 1.25rem 0;
+}
+.arch-file {
+  display: flex; align-items: center; gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.arch-file:last-child { border-bottom: none; }
+.arch-file-icon {
+  width: 36px; height: 36px;
+  background: rgba(74,240,196,0.07);
+  border: 1px solid rgba(74,240,196,0.2);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 0.65rem; font-weight: 600;
+  color: var(--accent); letter-spacing: -0.02em; flex-shrink: 0;
+}
+.arch-file-name {
+  font-family: var(--mono); font-size: 0.9rem; font-weight: 600;
+  color: var(--text-head);
+}
+.arch-file-meta {
+  margin-left: auto;
+  display: flex; gap: 0.75rem; align-items: center;
+}
+.arch-file-lines {
+  font-family: var(--mono); font-size: 0.72rem;
+  color: var(--accent4); font-weight: 600;
+}
+.arch-file-desc {
+  font-size: 0.8rem; color: var(--text-dim);
+}
+
+.ascii-diagram {
+  font-family: var(--mono); font-size: 0.82rem;
+  line-height: 1.85;
+  color: var(--text);
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem 1.75rem;
+  overflow-x: auto;
+}
+
+/* ═══════════════════════════════════════════════════════
+   17. CHECKLIST
+   ═══════════════════════════════════════════════════════ */
+.checklist {
+  display: flex; flex-direction: column; gap: 0.6rem;
+  margin: 1.25rem 0;
+}
+.check-item {
+  display: flex; align-items: flex-start; gap: 0.85rem;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.85rem 1.1rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+}
+.check-item:hover { border-color: var(--accent3); }
+.check-item.done {
+  border-color: rgba(74,240,144,0.3);
+  background: rgba(74,240,144,0.04);
+}
+.check-box {
+  width: 18px; height: 18px; flex-shrink: 0;
+  border: 1.5px solid var(--border);
+  border-radius: 4px; margin-top: 0.15rem;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem;
+  transition: border-color 0.15s, background 0.15s;
+}
+.check-item.done .check-box {
+  background: var(--success);
+  border-color: var(--success);
+  color: var(--bg);
+}
+.check-box::after { content: ''; }
+.check-item.done .check-box::after { content: '✓'; }
+.check-text { font-size: 0.88rem; color: var(--text); line-height: 1.5; }
+.check-item.done .check-text { color: var(--text-dim); text-decoration: line-through; }
+.check-priority {
+  font-family: var(--mono); font-size: 0.6rem; font-weight: 600;
+  letter-spacing: 0.05em; padding: 0.15rem 0.45rem;
+  border-radius: 4px; margin-left: auto; flex-shrink: 0; margin-top: 0.1rem;
+}
+.priority-high { background: rgba(240,90,90,0.1); border: 1px solid rgba(240,90,90,0.2); color: var(--danger); }
+.priority-med  { background: rgba(240,212,74,0.1); border: 1px solid rgba(240,212,74,0.2); color: var(--accent4); }
+.priority-low  { background: rgba(74,240,144,0.1); border: 1px solid rgba(74,240,144,0.2); color: var(--success); }
+
+.checklist-meta {
+  font-family: var(--mono); font-size: 0.72rem; color: var(--text-dim);
+  margin-top: 0.5rem;
+}
+
+/* ═══════════════════════════════════════════════════════
+   18. PRESENTATION STEPS
+   ═══════════════════════════════════════════════════════ */
+.pres-steps { display: flex; flex-direction: column; gap: 1rem; }
+.pres-step {
+  display: flex; gap: 1.1rem;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.1rem 1.25rem;
+  align-items: flex-start;
+  transition: border-color 0.15s;
+}
+.pres-step:hover { border-color: var(--accent3); }
+.pres-step-num {
+  font-family: var(--mono); font-size: 1rem; font-weight: 600;
+  color: var(--accent); min-width: 2rem;
+  line-height: 1.4;
+}
+.pres-step-title {
+  font-weight: 600; color: var(--text-head);
+  font-size: 0.92rem; margin-bottom: 0.3rem;
+}
+.pres-step-desc { font-size: 0.83rem; color: var(--text-dim); line-height: 1.55; }
+.pres-step-time {
+  margin-left: auto; flex-shrink: 0;
+  font-family: var(--mono); font-size: 0.65rem; font-weight: 600;
+  color: var(--accent4);
+  background: rgba(240,212,74,0.07);
+  border: 1px solid rgba(240,212,74,0.2);
+  padding: 0.2rem 0.5rem; border-radius: 4px;
+  margin-top: 0.1rem;
+}
+
+/* ═══════════════════════════════════════════════════════
+   19. SECTION DIVIDER
+   ═══════════════════════════════════════════════════════ */
+.content-section {
+  padding: 3rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.content-section:last-child { border-bottom: none; }
+
+/* ═══════════════════════════════════════════════════════
+   20. FOOTER
+   ═══════════════════════════════════════════════════════ */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 2.5rem 0 0;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 1rem;
+  font-size: 0.78rem; color: var(--text-dim);
+}
+.footer-left { font-family: var(--mono); line-height: 1.7; }
+.footer-version {
+  font-family: var(--mono); font-size: 0.65rem; font-weight: 600;
+  color: var(--accent);
+  background: rgba(74,240,196,0.07);
+  border: 1px solid rgba(74,240,196,0.2);
+  padding: 0.3rem 0.7rem; border-radius: 100px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   21. MISC UTILITIES
+   ═══════════════════════════════════════════════════════ */
+strong { font-weight: 600; color: var(--text-head); }
+ul { list-style: none; }
+ul li {
+  padding: 0.2rem 0 0.2rem 1.25rem;
+  position: relative; font-size: 0.9rem; color: var(--text);
+}
+ul li::before {
+  content: '—';
+  position: absolute; left: 0;
+  color: var(--accent); font-family: var(--mono); font-size: 0.7rem;
+}
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+
+/* ═══════════════════════════════════════════════════════
+   22. RESPONSIVE
+   ═══════════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .mobile-header { display: flex; }
+  .layout { grid-template-columns: 1fr; }
+  .sidebar {
+    position: fixed; top: 0; left: 0;
+    width: 260px; height: 100vh; z-index: 100;
+    background: var(--bg);
+    transform: translateX(-100%);
+    box-shadow: var(--shadow);
+  }
+  .sidebar.open { transform: translateX(0); }
+  main { padding: 2rem 1.5rem 4rem; }
+  .two-col { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 500px) {
+  main { padding: 1.5rem 1.1rem 3rem; }
+  h2 { font-size: 1.55rem; }
+  .hero h1 { font-size: 1.9rem; }
+  .modules-grid { grid-template-columns: 1fr; }
+  .struct-grid { grid-template-columns: 1fr; }
+}
+
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Ir para o conteúdo</a>
+<div id="progress-bar" role="progressbar" aria-hidden="true"></div>
+<div id="sidebar-overlay"></div>
+
+<!-- Mobile Header -->
+<header class="mobile-header" id="mob-header">
+  <span class="mobile-title">APS · Seg. Digital</span>
+  <button class="hamburger" id="hamburger" aria-label="Abrir menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar" aria-label="Navegação principal">
+    <div class="sidebar-brand">
+      <span class="sidebar-logo">APS · v-min</span>
+      <span class="sidebar-tagline">Guia de Segurança Digital<br>Versão Mínima · Java</span>
+    </div>
+
+    <div class="nav-group">
+      <span class="nav-group-label">Visão Geral</span>
+      <a href="#inicio"     class="nav-link" data-section="inicio">Início</a>
+      <a href="#requisitos" class="nav-link" data-section="requisitos">Requisitos</a>
+    </div>
+
+    <div class="nav-group">
+      <span class="nav-group-label">Técnico</span>
+      <a href="#modulos"    class="nav-link" data-section="modulos">Os 2 Módulos</a>
+      <a href="#estruturas" class="nav-link" data-section="estruturas">Estruturas</a>
+      <a href="#arquitetura"class="nav-link" data-section="arquitetura">Arquitetura</a>
+      <a href="#validacao"  class="nav-link" data-section="validacao">Validação</a>
+    </div>
+
+    <div class="nav-group">
+      <span class="nav-group-label">Execução</span>
+      <a href="#compilacao" class="nav-link" data-section="compilacao">Compilação</a>
+      <a href="#fluxo"      class="nav-link" data-section="fluxo">Fluxo</a>
+    </div>
+
+    <div class="nav-group">
+      <span class="nav-group-label">Entrega</span>
+      <a href="#checklist"  class="nav-link" data-section="checklist">Checklist</a>
+      <a href="#apresentacao" class="nav-link" data-section="apresentacao">Apresentação</a>
+    </div>
+
+    <div class="sidebar-controls">
+      <span class="ctrl-label">Tema</span>
+      <div class="theme-grid">
+        <button class="theme-btn" data-t="dark"  title="Dark">DK</button>
+        <button class="theme-btn" data-t="nord"  title="Nord">NO</button>
+        <button class="theme-btn" data-t="tokyo" title="Tokyo">TK</button>
+        <button class="theme-btn" data-t="light" title="Light">LT</button>
+        <button class="theme-btn" data-t="hc"    title="Alto contraste">HC</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main id="main">
+
+    <!-- ── HERO ── -->
+    <section id="inicio" class="section">
+      <div class="hero">
+        <div class="hero-badge">APS · Lógica de Programação</div>
+        <h1>Guia de Segurança Digital<em>Mínimo. Preciso. Funcional.</em></h1>
+        <p class="hero-desc">
+          Um programa interativo em Java que cobre dois módulos de segurança digital —
+          Senhas e Golpes Online — usando apenas as estruturas obrigatórias da disciplina.
+          Sem inflação de complexidade. Cada linha tem uma razão de existir.
+        </p>
+        <div class="hero-chips">
+          <span class="chip accent">Java · stdlib pura</span>
+          <span class="chip accent2">1 arquivo</span>
+          <span class="chip accent3">~80 linhas</span>
+          <span class="chip">2 módulos</span>
+          <span class="chip">3 estruturas obrigatórias</span>
+          <span class="chip">0 dependências externas</span>
+        </div>
+        <a href="#requisitos" class="hero-cta">Ver requisitos atendidos →</a>
+      </div>
+    </section>
+
+    <!-- ── REQUISITOS ── -->
+    <section id="requisitos" class="content-section section">
+      <span class="section-num">01 — REQUISITOS</span>
+      <h2>Requisitos Atendidos</h2>
+      <p class="section-lead">
+        Mapeamento direto entre os critérios da rubrica e a implementação.
+        Cada requisito é atendido com o mínimo de código necessário — sem estrutura de suporte que não sirva ao requisito.
+      </p>
+
+      <h3 style="font-family:var(--mono);font-size:0.8rem;color:var(--text-dim);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.75rem;">Requisitos Básicos Obrigatórios</h3>
+      <table class="req-table">
+        <thead>
+          <tr>
+            <th>Requisito</th>
+            <th>Onde no código</th>
+            <th>Como é usado</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>while</code></td>
+            <td>Loop principal · <code>lerInteiro()</code></td>
+            <td>Mantém o menu ativo até <code>opcao == 0</code>; valida entradas inválidas</td>
+            <td><span class="status-ok">Atendido</span></td>
+          </tr>
+          <tr>
+            <td><code>switch</code></td>
+            <td><code>main()</code></td>
+            <td>Roteia para <code>moduloSenhas()</code>, <code>moduloGolpes()</code> ou encerramento</td>
+            <td><span class="status-ok">Atendido</span></td>
+          </tr>
+          <tr>
+            <td><code>if</code></td>
+            <td><code>moduloSenhas()</code> · <code>moduloGolpes()</code></td>
+            <td>Classifica força da senha em 3 níveis; exibe dicas condicionais sobre golpes</td>
+            <td><span class="status-ok">Atendido</span></td>
+          </tr>
+          <tr>
+            <td>Programa interativo</td>
+            <td>Fluxo completo</td>
+            <td>Menu com prompt, leitura de entrada, feedback imediato ao usuário</td>
+            <td><span class="status-ok">Atendido</span></td>
+          </tr>
+          <tr>
+            <td>Retorno ao menu</td>
+            <td><code>while</code> no <code>main()</code></td>
+            <td>Qualquer módulo finaliza e retorna automaticamente ao menu principal</td>
+            <td><span class="status-ok">Atendido</span></td>
+          </tr>
+          <tr>
+            <td>Scanner</td>
+            <td><code>static Scanner sc</code></td>
+            <td>Scanner estático compartilhado entre todos os métodos</td>
+            <td><span class="status-ok">Atendido</span></td>
+          </tr>
+          <tr>
+            <td>Saída clara e organizada</td>
+            <td>Todos os módulos</td>
+            <td>Separadores visuais, mensagens em pt-BR, formatação consistente</td>
+            <td><span class="status-ok">Atendido</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 style="font-family:var(--mono);font-size:0.8rem;color:var(--text-dim);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.75rem;margin-top:1.5rem;">Requisitos do Tema</h3>
+      <table class="req-table">
+        <thead>
+          <tr>
+            <th>Requisito</th>
+            <th>Implementação</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Tema: Segurança Digital</td>
+            <td>Dois módulos educativos: Senhas Seguras e Golpes Online</td>
+            <td><span class="status-ok">Atendido</span></td>
+          </tr>
+          <tr>
+            <td>Mínimo 2 áreas/tópicos</td>
+            <td>Módulo 1: senhas · Módulo 2: phishing, falso suporte, golpe do Pix</td>
+            <td><span class="status-ok">Atendido</span></td>
+          </tr>
+          <tr>
+            <td>Abordagem educativa/prática</td>
+            <td>Cada módulo exibe conteúdo e coleta resposta do usuário, gerando feedback personalizado</td>
+            <td><span class="status-ok">Atendido</span></td>
+          </tr>
+          <tr>
+            <td>Conteúdo autoral</td>
+            <td>Textos, dicas e cenários produzidos pela equipe — sem cópia direta</td>
+            <td><span class="status-ok">Atendido</span></td>
+          </tr>
+          <tr>
+            <td>Execução sem erros</td>
+            <td><code>lerInteiro()</code> captura entradas inválidas antes de qualquer operação</td>
+            <td><span class="status-ok">Atendido</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout success">
+        <span class="callout-label">Nota sobre a filosofia de implementação</span>
+        A versão mínima atende todos os critérios de avaliação: implementação correta,
+        organização e legibilidade do código, interatividade, qualidade de conteúdo e criatividade.
+        A ausência de estruturas adicionais é uma escolha deliberada — não uma limitação.
+      </div>
+    </section>
+
+    <!-- ── MÓDULOS ── -->
+    <section id="modulos" class="content-section section">
+      <span class="section-num">02 — MÓDULOS</span>
+      <h2>Os 2 Módulos</h2>
+      <p class="section-lead">
+        Cada módulo cobre um tema de segurança digital, apresenta conteúdo educativo e interage
+        com o usuário para gerar um feedback personalizado.
+      </p>
+
+      <div class="modules-grid">
+        <div class="module-card teal">
+          <span class="module-num">MÓDULO 01 · Tecla 1</span>
+          <div class="module-title">Senhas Seguras</div>
+          <p class="module-desc">
+            Apresenta as boas práticas para criação de senhas fortes. Solicita o tamanho
+            da senha atual do usuário e classifica sua força em três níveis, com
+            recomendações específicas para cada caso.
+          </p>
+          <div class="module-tags">
+            <span class="tag teal">if / else if / else</span>
+            <span class="tag blue">Scanner.nextInt()</span>
+            <span class="tag">conteúdo educativo</span>
+          </div>
+        </div>
+
+        <div class="module-card orange">
+          <span class="module-num">MÓDULO 02 · Tecla 2</span>
+          <div class="module-title">Golpes Online</div>
+          <p class="module-desc">
+            Descreve os três tipos de golpe mais comuns: phishing, falso suporte técnico
+            e golpe do Pix. Pergunta se o usuário já recebeu algum desses e entrega dicas
+            de proteção ou prevenção conforme a resposta.
+          </p>
+          <div class="module-tags">
+            <span class="tag orange">if / else</span>
+            <span class="tag blue">Scanner.nextInt()</span>
+            <span class="tag">3 tipos de golpe</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout blue">
+        <span class="callout-label">Detalhe do Módulo 1 — Classificação de senhas</span>
+        O <code>if / else if / else</code> em <code>moduloSenhas()</code> implementa três níveis:
+        <strong>≥ 12 caracteres</strong> → senha adequada;
+        <strong>≥ 8 e &lt; 12</strong> → razoável, precisa melhorar;
+        <strong>&lt; 8</strong> → vulnerável, troca imediata. Três caminhos distintos, lógica
+        clara, sem ambiguidade.
+      </div>
+
+      <div class="callout orange">
+        <span class="callout-label">Detalhe do Módulo 2 — Feedback bifurcado</span>
+        O <code>if / else</code> em <code>moduloGolpes()</code> separa dois fluxos:
+        usuário que <strong>já recebeu</strong> um golpe (dicas de resposta imediata) e
+        usuário que <strong>nunca recebeu</strong> (dicas de prevenção). O conteúdo
+        é diferente em cada caso — não é só uma mensagem de confirmação.
+      </div>
+    </section>
+
+    <!-- ── ESTRUTURAS ── -->
+    <section id="estruturas" class="content-section section">
+      <span class="section-num">03 — ESTRUTURAS</span>
+      <h2>Estruturas de Controle</h2>
+      <p class="section-lead">
+        As três estruturas obrigatórias da disciplina, usadas de forma orgânica —
+        cada uma onde faz sentido semanticamente, não apenas para "cumprir o requisito".
+      </p>
+
+      <div class="struct-grid">
+
+        <div class="struct-item">
+          <div class="struct-name">
+            <code>while</code>
+            <span class="struct-badge badge-obrig">OBRIGATÓRIO</span>
+          </div>
+          <div class="struct-location">main() · lerInteiro()</div>
+          <p class="struct-desc">
+            Usado em dois contextos distintos. No <code>main()</code>, mantém o programa
+            vivo enquanto o usuário não digita 0 — o loop natural de qualquer menu.
+            Em <code>lerInteiro()</code>, rejeita entradas não-numéricas em loop até
+            receber um inteiro válido.
+          </p>
+        </div>
+
+        <div class="struct-item">
+          <div class="struct-name">
+            <code>switch</code>
+            <span class="struct-badge badge-obrig">OBRIGATÓRIO</span>
+          </div>
+          <div class="struct-location">main()</div>
+          <p class="struct-desc">
+            Roteia a opção do usuário para o módulo correto. Com 4 casos (1, 2, 0 e
+            <code>default</code>), o <code>switch</code> é a estrutura semanticamente
+            correta para navegação por menu — mais legível que uma cadeia de
+            <code>if/else if</code> equivalente.
+          </p>
+        </div>
+
+        <div class="struct-item">
+          <div class="struct-name">
+            <code>if / else if / else</code>
+            <span class="struct-badge badge-obrig">OBRIGATÓRIO</span>
+          </div>
+          <div class="struct-location">moduloSenhas() · moduloGolpes()</div>
+          <p class="struct-desc">
+            Forma completa nos dois módulos. Em senhas, implementa três níveis de
+            classificação com faixas numéricas sobrepostas — use case canônico de
+            <code>else if</code>. Em golpes, implementa bifurcação binária com
+            <code>if/else</code>.
+          </p>
+        </div>
+
+        <div class="struct-item">
+          <div class="struct-name">
+            <code>while (!sc.hasNextInt())</code>
+            <span class="struct-badge" style="background:rgba(122,156,240,0.1);border:1px solid rgba(122,156,240,0.25);color:var(--accent3);">EXTRA</span>
+          </div>
+          <div class="struct-location">lerInteiro()</div>
+          <p class="struct-desc">
+            Validação defensiva de entrada. O método <code>lerInteiro()</code> age como
+            camada de segurança entre o usuário e o <code>switch</code> — se alguém
+            digitar texto no menu, o programa não quebra: pede uma entrada válida
+            até receber.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── ARQUITETURA ── -->
+    <section id="arquitetura" class="content-section section">
+      <span class="section-num">04 — ARQUITETURA</span>
+      <h2>Arquitetura</h2>
+      <p class="section-lead">
+        Um único arquivo Java. Quatro métodos com responsabilidades distintas.
+        Sem overhead de classes, sem estado global desnecessário.
+      </p>
+
+      <div class="arch-block">
+        <div class="arch-file">
+          <div class="arch-file-icon">JAVA</div>
+          <div>
+            <div class="arch-file-name">GuiaSegurancaDigital.java</div>
+            <div class="arch-file-desc">Arquivo único — ponto de entrada e lógica completa</div>
+          </div>
+          <div class="arch-file-meta">
+            <span class="arch-file-lines">~80 linhas</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ascii-diagram">
+<span class="cm">GuiaSegurancaDigital.java</span>
+├── <span class="kw">static</span> <span class="cls">Scanner</span> sc                  <span class="cm">// Scanner compartilhado entre métodos</span>
+│
+├── <span class="fn">main()</span>                             <span class="cm">// Loop principal</span>
+│   ├── <span class="kw">while</span> (opcao != <span class="num">0</span>)           <span class="cm">// ← while obrigatório</span>
+│   │   ├── exibe menu
+│   │   ├── opcao = lerInteiro()
+│   │   └── <span class="kw">switch</span> (opcao)            <span class="cm">// ← switch obrigatório</span>
+│   │       ├── case <span class="num">1</span> → moduloSenhas()
+│   │       ├── case <span class="num">2</span> → moduloGolpes()
+│   │       ├── case <span class="num">0</span> → encerrar
+│   │       └── default → "opção inválida"
+│
+├── <span class="fn">moduloSenhas()</span>
+│   ├── exibe boas práticas
+│   ├── lê tamanho da senha
+│   └── <span class="kw">if</span> / <span class="kw">else if</span> / <span class="kw">else</span>          <span class="cm">// ← if obrigatório (3 níveis)</span>
+│       ├── ≥12 → "senha adequada"
+│       ├── ≥8  → "razoável, melhore"
+│       └── &lt;8  → "vulnerável, troque agora"
+│
+├── <span class="fn">moduloGolpes()</span>
+│   ├── lista 3 tipos de golpe
+│   ├── pergunta se usuário já recebeu
+│   └── <span class="kw">if</span> / <span class="kw">else</span>                      <span class="cm">// ← if (dicas de resposta vs prevenção)</span>
+│       ├── sim → dicas de reação
+│       └── não → dicas de prevenção
+│
+└── <span class="fn">lerInteiro()</span>                       <span class="cm">// Helper de entrada segura</span>
+    └── <span class="kw">while</span> (!sc.hasNextInt())      <span class="cm">// rejeita entradas inválidas</span>
+      </div>
+    </section>
+
+    <!-- ── VALIDAÇÃO ── -->
+    <section id="validacao" class="content-section section">
+      <span class="section-num">05 — VALIDAÇÃO</span>
+      <h2>Validação de Entrada</h2>
+      <p class="section-lead">
+        O método <code>lerInteiro()</code> é a peça mais elegante do projeto — três linhas
+        que eliminam toda a classe de erros de entrada inválida.
+      </p>
+
+      <div class="code-wrap">
+        <span class="code-label">GuiaSegurancaDigital.java · lerInteiro()</span>
+        <button class="copy-btn" onclick="copyCode(this)">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          copiar
+        </button>
+        <pre><span class="kw">static</span> <span class="kw">int</span> <span class="fn">lerInteiro</span>() {
+    <span class="kw">while</span> (!sc.hasNextInt()) {
+        <span class="cls">System</span>.out.print(<span class="str">"Digite um número válido: "</span>);
+        sc.next(); <span class="cm">// descarta o token inválido</span>
+    }
+    <span class="kw">return</span> sc.nextInt();
+}</pre>
+      </div>
+
+      <div class="callout yellow">
+        <span class="callout-label">Por que isso importa</span>
+        Sem <code>lerInteiro()</code>, digitar "abc" no menu causaria um
+        <code>InputMismatchException</code> e quebraria o programa. Com ele, o loop
+        <code>while (!sc.hasNextInt())</code> continua pedindo entrada até receber um inteiro —
+        o programa nunca quebra independente do que o usuário digitar.
+      </div>
+
+      <div class="two-col">
+        <div>
+          <div class="callout danger" style="margin:0">
+            <span class="callout-label">Sem validação</span>
+            Usuário digita "abc" → <code>InputMismatchException</code> → programa encerra com erro.
+            Professor vê stack trace no terminal.
+          </div>
+        </div>
+        <div>
+          <div class="callout success" style="margin:0">
+            <span class="callout-label">Com lerInteiro()</span>
+            Usuário digita "abc" → programa exibe "Digite um número válido:" → espera
+            → usuário digita 1 → executa normalmente.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── COMPILAÇÃO ── -->
+    <section id="compilacao" class="content-section section">
+      <span class="section-num">06 — COMPILAÇÃO</span>
+      <h2>Compilação &amp; Execução</h2>
+      <p class="section-lead">
+        Um arquivo, dois comandos. Funciona em qualquer sistema com Java 8 ou superior.
+      </p>
+
+      <div class="code-wrap">
+        <span class="code-label">Terminal · Compilar e rodar</span>
+        <button class="copy-btn" onclick="copyCode(this)">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          copiar
+        </button>
+        <pre>javac GuiaSegurancaDigital.java
+java GuiaSegurancaDigital</pre>
+      </div>
+
+      <div class="code-wrap">
+        <span class="code-label">Verificar versão do Java</span>
+        <button class="copy-btn" onclick="copyCode(this)">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          copiar
+        </button>
+        <pre>java -version
+<span class="cm"># precisa de: java 8 ou superior
+# testado em: Java 11 e Java 21</span></pre>
+      </div>
+
+      <div class="callout">
+        <span class="callout-label">Compatibilidade</span>
+        O código usa apenas <code>java.util.Scanner</code> e <code>System.out.println()</code>
+        — stdlib pura. Compila e roda em qualquer ambiente Java 8+ sem configuração adicional.
+        Sem caracteres ANSI, sem dependências, sem módulos especiais.
+      </div>
+
+      <h3 style="font-family:var(--sans);font-size:1rem;font-weight:600;color:var(--text-head);margin:1.5rem 0 0.75rem;">Saída esperada no terminal</h3>
+
+      <div class="code-wrap">
+        <span class="code-label">Terminal · Execução de exemplo</span>
+        <pre><span class="cm">========================================
+   GUIA DE SEGURANÇA DIGITAL
+========================================
+1. Senhas Seguras
+2. Golpes Online
+0. Sair
+Escolha uma opção:</span> 1
+
+<span class="str">--- SENHAS SEGURAS ---
+Uma boa senha deve ter:
+- Pelo menos 12 caracteres
+- Letras maiúsculas e minúsculas
+- Números e símbolos (!@#$%)
+- Nunca use datas de aniversário ou nomes
+
+Quantos caracteres tem sua senha atual?</span> 7
+<span class="cm">✗ Sua senha é curta e vulnerável. Troque-a agora!</span>
+
+<span class="cm">========================================
+   GUIA DE SEGURANÇA DIGITAL
+========================================
+...</span>
+Escolha uma opção: 0
+
+<span class="str">Até mais! Fique seguro online.</span></pre>
+      </div>
+    </section>
+
+    <!-- ── FLUXO ── -->
+    <section id="fluxo" class="content-section section">
+      <span class="section-num">07 — FLUXO</span>
+      <h2>Fluxo de Navegação</h2>
+      <p class="section-lead">
+        O programa tem uma única rota de entrada e todas as saídas voltam ao mesmo ponto.
+        Isso é feito pelo <code>while</code> do <code>main()</code>.
+      </p>
+
+      <div class="ascii-diagram">
+<span class="fn">INÍCIO</span>
+   │
+   ▼
+<span class="kw">[MENU PRINCIPAL]</span>          <span class="cm">← while (opcao != 0)</span>
+   │
+   ├──── 1 ──→ <span class="fn">[SENHAS SEGURAS]</span>
+   │              │  Exibe boas práticas
+   │              │  Lê tamanho da senha
+   │              │  if/else if/else → feedback
+   │              └──────────────────────→ MENU
+   │
+   ├──── 2 ──→ <span class="fn">[GOLPES ONLINE]</span>
+   │              │  Exibe tipos de golpe
+   │              │  Pergunta se já recebeu
+   │              │  if/else → dicas
+   │              └──────────────────────→ MENU
+   │
+   ├──── 0 ──→ <span class="str">"Até mais! Fique seguro online."</span>
+   │              └──────────────────────→ <span class="fn">FIM</span>
+   │
+   └── outro → <span class="cm">"Opção inválida. Tente novamente."</span>
+                  └──────────────────────→ MENU
+      </div>
+
+      <div class="callout blue">
+        <span class="callout-label">Observação sobre o fluxo</span>
+        O retorno ao menu é automático — não é uma opção "voltar" explícita.
+        Quando <code>moduloSenhas()</code> ou <code>moduloGolpes()</code> terminam de executar,
+        o controle volta para o <code>while</code> no <code>main()</code>, que exibe o menu
+        novamente. É o comportamento correto e esperado pela rubrica.
+      </div>
+    </section>
+
+    <!-- ── CHECKLIST ── -->
+    <section id="checklist" class="content-section section">
+      <span class="section-num">08 — ENTREGA</span>
+      <h2>Checklist de Entrega</h2>
+      <p class="section-lead">
+        Clique em cada item para marcar como concluído. Estado salvo no navegador.
+      </p>
+
+      <div class="checklist" id="checklist-items">
+
+        <div class="check-item" data-id="c1" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <span class="check-text">
+            <strong>Substituir nomes dos alunos</strong> — trocar <code>[NOME DO ALUNO X]</code>
+            nos comentários do arquivo pelo nome real de cada integrante da equipe.
+          </span>
+          <span class="check-priority priority-high">CRÍTICO</span>
+        </div>
+
+        <div class="check-item" data-id="c2" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <span class="check-text">
+            <strong>Testar compilação</strong> no computador que será usado na apresentação —
+            <code>javac GuiaSegurancaDigital.java</code> deve compilar sem warnings.
+          </span>
+          <span class="check-priority priority-high">CRÍTICO</span>
+        </div>
+
+        <div class="check-item" data-id="c3" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <span class="check-text">
+            <strong>Confirmar Java instalado</strong> — <code>java -version</code> deve retornar
+            versão 8 ou superior no terminal da apresentação.
+          </span>
+          <span class="check-priority priority-high">CRÍTICO</span>
+        </div>
+
+        <div class="check-item" data-id="c4" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <span class="check-text">
+            <strong>Ensaiar o roteiro completo</strong> — navegar por ambos os módulos,
+            testar entrada inválida (digitar texto no menu), testar saída com opção 0.
+          </span>
+          <span class="check-priority priority-med">IMPORTANTE</span>
+        </div>
+
+        <div class="check-item" data-id="c5" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <span class="check-text">
+            <strong>Preparar a frase de abertura</strong> — saber explicar em 30 segundos
+            o que o programa faz e quais estruturas usa antes de rodar.
+          </span>
+          <span class="check-priority priority-med">IMPORTANTE</span>
+        </div>
+
+        <div class="check-item" data-id="c6" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <span class="check-text">
+            <strong>Entregar o arquivo .java</strong> com o código-fonte + este README
+            (ou as instruções de compilação) conforme o formato pedido pelo professor.
+          </span>
+          <span class="check-priority priority-low">ENTREGA</span>
+        </div>
+
+      </div>
+
+      <p class="checklist-meta" id="checklist-progress">0 de 6 concluídos</p>
+
+      <div class="callout orange" style="margin-top:1.5rem;">
+        <span class="callout-label">⚠ Antes de apresentar — pré-flight</span>
+        Abra o terminal, navegue até o diretório com o arquivo .java, execute
+        <code>javac GuiaSegurancaDigital.java &amp;&amp; java GuiaSegurancaDigital</code>.
+        Se rodar sem erro nessa máquina, está pronto. Não confie que "funcionou na minha máquina" sem testar no computador da sala.
+      </div>
+    </section>
+
+    <!-- ── APRESENTAÇÃO ── -->
+    <section id="apresentacao" class="content-section section">
+      <span class="section-num">09 — APRESENTAÇÃO</span>
+      <h2>Roteiro de Apresentação</h2>
+      <p class="section-lead">
+        Quatro atos, aproximadamente 5–8 minutos. O objetivo é mostrar o programa
+        rodando e explicar as três estruturas obrigatórias enquanto elas aparecem na tela.
+      </p>
+
+      <div class="pres-steps">
+
+        <div class="pres-step">
+          <div class="pres-step-num">01</div>
+          <div>
+            <div class="pres-step-title">Abertura — o que é o projeto</div>
+            <p class="pres-step-desc">
+              <em>"Nosso projeto é um guia interativo de segurança digital em Java. O usuário aprende sobre
+              senhas e golpes online navegando por dois módulos com feedback personalizado.
+              Implementamos as três estruturas obrigatórias: <code>while</code>, <code>switch</code> e <code>if</code>."</em>
+            </p>
+          </div>
+          <div class="pres-step-time">~1 min</div>
+        </div>
+
+        <div class="pres-step">
+          <div class="pres-step-num">02</div>
+          <div>
+            <div class="pres-step-title">Mostrar o menu — aponte o while e o switch</div>
+            <p class="pres-step-desc">
+              Execute o programa. Mostre o menu e diga:
+              <em>"O <code>while</code> mantém o usuário aqui até ele digitar 0. O <code>switch</code>
+              decide qual módulo executar baseado no número escolhido."</em>
+            </p>
+          </div>
+          <div class="pres-step-time">~1 min</div>
+        </div>
+
+        <div class="pres-step">
+          <div class="pres-step-num">03</div>
+          <div>
+            <div class="pres-step-title">Módulo 1 — demonstre o if e volte ao menu</div>
+            <p class="pres-step-desc">
+              Entre no módulo 1. Digite um número de senha pequeno (ex: 6) e mostre o feedback vermelho.
+              Depois volte e tente com 15 — mostre o feedback positivo.
+              <em>"Aqui está o <code>if / else if / else</code> — três caminhos diferentes conforme o tamanho."</em>
+            </p>
+          </div>
+          <div class="pres-step-time">~2 min</div>
+        </div>
+
+        <div class="pres-step">
+          <div class="pres-step-num">04</div>
+          <div>
+            <div class="pres-step-title">Módulo 2 — e encerre com o relatório</div>
+            <p class="pres-step-desc">
+              Entre no módulo 2. Responda 1 (já recebeu golpe) para mostrar as dicas de reação,
+              depois saia com opção 0.
+              <em>"Mesmo estrutura — <code>if/else</code> bifurca o fluxo. O programa encerra limpo."</em>
+            </p>
+          </div>
+          <div class="pres-step-time">~2 min</div>
+        </div>
+
+        <div class="pres-step">
+          <div class="pres-step-num">05</div>
+          <div>
+            <div class="pres-step-title">Encerramento — mencione lerInteiro()</div>
+            <p class="pres-step-desc">
+              <em>"Adicionamos um método <code>lerInteiro()</code> com um segundo <code>while</code>
+              que protege o programa de entradas inválidas — se alguém digitar texto no menu,
+              ele não quebra. Cobre todos os requisitos: <code>while</code>, <code>switch</code>,
+              <code>if</code>, menu interativo, dois tópicos, retorno ao menu."</em>
+            </p>
+          </div>
+          <div class="pres-step-time">~1 min</div>
+        </div>
+
+      </div>
+
+      <div class="callout">
+        <span class="callout-label">Dica de apresentação</span>
+        Não leia o código linha a linha — demonstre o programa rodando e
+        <strong>aponte as estruturas enquanto elas executam</strong>. Quando o menu aparecer,
+        diga "aqui está o while". Quando entrar no módulo 1, diga "aqui está o switch".
+        Quando o feedback aparecer, diga "aqui está o if". O professor vê e ouve ao mesmo tempo.
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="footer-left">
+        APS · Lógica de Programação<br>
+        <span style="color:var(--text-dim);font-size:0.7rem;">Guia de Segurança Digital — Versão Mínima</span>
+      </div>
+      <span class="footer-version">v-min · 1 arquivo · ~80 linhas</span>
+    </footer>
+
+  </main>
+</div><!-- .layout -->
+
+<script>
+// ── PROGRESS BAR ──────────────────────────────────────
+const bar = document.getElementById('progress-bar');
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+  bar.style.width = pct + '%';
+}, { passive: true });
+
+// ── MOBILE HAMBURGER ──────────────────────────────────
+const sidebar  = document.getElementById('sidebar');
+const hamburger= document.getElementById('hamburger');
+const overlay  = document.getElementById('sidebar-overlay');
+
+function toggleSidebar(open) {
+  const isOpen = open !== undefined ? open : !sidebar.classList.contains('open');
+  sidebar.classList.toggle('open', isOpen);
+  hamburger.classList.toggle('active', isOpen);
+  overlay.classList.toggle('visible', isOpen);
+  hamburger.setAttribute('aria-expanded', isOpen);
+}
+
+hamburger.addEventListener('click', () => toggleSidebar());
+overlay.addEventListener('click', () => toggleSidebar(false));
+sidebar.querySelectorAll('.nav-link').forEach(l =>
+  l.addEventListener('click', () => toggleSidebar(false))
+);
+
+// ── THEME ─────────────────────────────────────────────
+const html = document.documentElement;
+const themes = document.querySelectorAll('.theme-btn');
+
+function setTheme(t) {
+  html.setAttribute('data-theme', t);
+  localStorage.setItem('aps-theme', t);
+  themes.forEach(b => b.classList.toggle('active', b.dataset.t === t));
+}
+
+const saved = localStorage.getItem('aps-theme') ||
+  (window.matchMedia('(prefers-color-scheme:light)').matches ? 'light' : 'dark');
+setTheme(saved);
+themes.forEach(b => b.addEventListener('click', () => setTheme(b.dataset.t)));
+
+// ── ACTIVE NAV + SECTION FADE-IN ──────────────────────
+const sections = document.querySelectorAll('section[id]');
+const navLinks  = document.querySelectorAll('.nav-link[data-section]');
+const fadeSecs  = document.querySelectorAll('.section');
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      navLinks.forEach(l => {
+        l.classList.toggle('active', l.dataset.section === e.target.id);
+      });
+    }
+  });
+}, { rootMargin: '-20% 0px -60% 0px', threshold: 0 });
+
+sections.forEach(s => observer.observe(s));
+
+const fadeObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      fadeObserver.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.08 });
+
+fadeSecs.forEach(s => fadeObserver.observe(s));
+
+// ── COPY BUTTONS ──────────────────────────────────────
+function copyCode(btn) {
+  const pre = btn.closest('.code-wrap').querySelector('pre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ copiado';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> copiar`;
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+// ── CHECKLIST ─────────────────────────────────────────
+const STORAGE_KEY = 'aps-min-checklist';
+let checkState = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+function toggleCheck(el) {
+  const id = el.dataset.id;
+  checkState[id] = !checkState[id];
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(checkState));
+  renderChecklist();
+}
+
+function renderChecklist() {
+  const items = document.querySelectorAll('.check-item');
+  let done = 0;
+  items.forEach(item => {
+    const id = item.dataset.id;
+    const isDone = !!checkState[id];
+    item.classList.toggle('done', isDone);
+    if (isDone) done++;
+  });
+  document.getElementById('checklist-progress').textContent =
+    done + ' de ' + items.length + ' concluídos' +
+    (done === items.length ? ' — tudo pronto ✓' : '');
+}
+
+renderChecklist();
+</script>
+</body>
+</html>
